@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>จัดการตารางงาน</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Kanit',sans-serif;
+}
+
+body{
+background:#f4f6fb;
+}
+
+.layout{
+display:flex;
+}
+
+/* sidebar */
+
+.sidebar{
+width:220px;
+background:#fff;
+height:100vh;
+padding:20px;
+border-right:1px solid #eee;
+}
+
+.sidebar h2{
+margin-bottom:30px;
+}
+
+.sidebar a{
+display:block;
+padding:12px;
+margin-bottom:8px;
+text-decoration:none;
+color:#333;
+border-radius:8px;
+}
+
+.sidebar a.active{
+background:#e7efff;
+color:#2c5cff;
+}
+
+/* main */
+
+.main{
+flex:1;
+padding:30px;
+}
+
+/* header */
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.header-right{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.bell{
+font-size:20px;
+cursor:pointer;
+}
+
+.home-btn{
+background:#2c5cff;
+color:white;
+border:none;
+padding:8px 14px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* card */
+
+.card{
+background:white;
+border-radius:14px;
+padding:25px;
+}
+
+/* topbar */
+
+.topbar{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:20px;
+}
+
+.bell{
+font-size:20px;
+cursor:pointer;
+color:#555;
+}
+
+.date-btn{
+background:#eee;
+border:none;
+padding:5px 10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.pick-btn{
+background:#2c5cff;
+color:white;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.close-btn{
+margin-left:auto;
+background:#ff4d4d;
+color:white;
+border:none;
+padding:7px 14px;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* table */
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#f2f4f8;
+padding:12px;
+text-align:left;
+}
+
+td{
+padding:12px;
+border-bottom:1px solid #eee;
+cursor:pointer;
+}
+
+.status-free{
+color:green;
+font-weight:500;
+}
+
+.status-busy{
+color:red;
+font-weight:500;
+}
+
+.status-close{
+color:#999;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- sidebar -->
+
+<div class="sidebar">
+
+<h2>FM Barber</h2>
+
+<a href="admin.html">การจอง</a>
+<a class="active">จัดการตารางงาน</a>
+<a href="bookingadmin.html">รายการจอง</a>
+<script>
+    // ตรวจสอบว่า Login หรือยัง และเป็น Admin ไหม
+    const auth = JSON.parse(localStorage.getItem("currentUser"));
+    if(!auth || auth.role !== 'admin') {
+        alert("สิทธิ์ไม่ถูกต้อง! หน้านี้สำหรับช่างเท่านั้น");
+        window.location.href = 'login.html';
+    }
+</script>
+</div>
+
+<!-- main -->
+
+<div class="main">
+
+<div class="header">
+
+<h3>จัดการตารางงาน</h3>
+
+<div class="header-right">
+
+<a href="notificationadmin.html"><span class="bell">🔔</span></a>
+
+<button class="home-btn" onclick="location.href='index.html'">
+กลับสู่หน้าหลัก
+</button>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="topbar">
+
+<button class="date-btn" onclick="changeDate(-1)"><</button>
+
+<h3 id="dateText"></h3>
+
+<button class="date-btn" onclick="changeDate(1)">></button>
+
+<button class="pick-btn" onclick="pickDate()">เลือกวัน</button>
+
+<button id="toggleShop" class="close-btn" onclick="toggleClose()">
+ปิดทำการ
+</button>
+
+<input type="date" id="datePicker" hidden>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>เวลา</th>
+<th>สถานะ</th>
+</tr>
+</thead>
+
+<tbody id="tableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let currentDate = new Date()
+
+const times=[
+"09:00","09:30","10:00","10:30",
+"11:00","11:30","12:00","12:30",
+"13:00","13:30","14:00","14:30",
+"15:00","15:30","16:00","16:30",
+"17:00","17:30","18:00","18:30",
+"19:00","19:30","20:00","20:30",
+"21:00"
+]
+
+function formatDate(date){
+  return date.getFullYear() + "-" +
+  String(date.getMonth()+1).padStart(2,"0") + "-" +
+  String(date.getDate()).padStart(2,"0");
+}
+
+function render(){
+
+let dateKey = formatDate(currentDate)
+
+let data = JSON.parse(localStorage.getItem("schedule_"+dateKey)) || {}
+
+let closed = localStorage.getItem("close_"+dateKey) === "true"
+
+const tbody = document.getElementById("tableBody")
+
+tbody.innerHTML=""
+
+document.getElementById("dateText").innerText =
+currentDate.toLocaleDateString("th-TH",
+{year:"numeric",month:"long",day:"numeric"})
+
+document.getElementById("toggleShop").innerText =
+closed ? "เปิดทำการ" : "ปิดทำการ"
+
+times.forEach(time=>{
+
+let status = data[time] || "ว่าง"
+
+let tr = document.createElement("tr")
+
+let text = closed ? "ปิด" : status
+
+let className =
+closed ? "status-close" :
+status==="ว่าง" ? "status-free" : "status-busy"
+
+tr.innerHTML = `
+<td>${time}</td>
+<td class="${className}">${text}</td>
+`
+
+if(!closed){
+
+tr.onclick = ()=>{
+
+if(data[time] === "ไม่ว่าง"){
+data[time] = "ว่าง"
+}else{
+data[time] = "ไม่ว่าง"
+}
+
+localStorage.setItem(
+"schedule_"+dateKey,
+JSON.stringify(data)
+)
+
+render()
+
+}
+
+}
+
+tbody.appendChild(tr)
+
+})
+
+}
+
+function changeDate(num){
+
+currentDate.setDate(currentDate.getDate()+num)
+
+render()
+
+}
+
+function pickDate(){
+
+document.getElementById("datePicker").showPicker()
+
+}
+
+document.getElementById("datePicker").onchange=function(){
+
+currentDate = new Date(this.value)
+
+render()
+
+}
+
+function toggleClose(){
+
+let dateKey = formatDate(currentDate)
+
+let closed = localStorage.getItem("close_"+dateKey) === "true"
+
+if(closed){
+
+localStorage.removeItem("close_"+dateKey)
+
+}else{
+
+localStorage.setItem("close_"+dateKey,"true")
+
+}
+
+render()
+
+}
+
+render()
+
+</script>
+
+</body>
+</html>

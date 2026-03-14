@@ -1,0 +1,298 @@
+body{
+font-family:'Kanit',sans-serif;
+margin:0;
+background:#f6f8fb;
+display:flex;
+color:#333;
+}
+
+/* sidebar */
+
+.sidebar{
+width:220px;
+background:white;
+height:100vh;
+padding:22px;
+border-right:1px solid #f0f0f0;
+}
+
+.sidebar h2{
+margin-bottom:30px;
+font-size:20px;
+}
+
+.menu a{
+display:block;
+padding:10px 12px;
+border-radius:8px;
+margin-bottom:8px;
+cursor:pointer;
+transition:0.2s;
+color:#444;
+}
+
+.menu a:hover{
+background:#f4f7ff;
+}
+
+.menu a.active{
+background:#e9f0ff;
+color:#2a6df5;
+font-weight:600;
+}
+
+
+/* main */
+
+.main{
+flex:1;
+padding:25px;
+}
+
+
+/* topbar */
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.right-menu{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.bell{
+font-size:20px;
+cursor:pointer;
+color:#555;
+}
+
+.home-btn{
+background:#2a6df5;
+color:white;
+border:none;
+padding:8px 16px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+}
+
+.home-btn:hover{
+background:#1e57d6;
+}
+
+
+/* layout */
+
+.content{
+display:flex;
+gap:20px;
+align-items:flex-start;
+}
+
+
+/* calendar */
+
+.calendar-box{
+flex:3;
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 4px 15px rgba(0,0,0,0.04);
+}
+
+.calendar-header{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:18px;
+margin-bottom:20px;
+}
+
+.calendar-header button:not(.date-btn){
+background:#f2f4f8;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+font-size:14px;
+}
+
+.calendar-header button:hover{
+background:#e6eaf2;
+}
+
+.calendar-header span{
+font-weight:600;
+font-size:16px;
+}
+
+/* table */
+
+.calendar-table{
+width:100%;
+border-collapse:collapse;
+font-size:14px;
+}
+
+.calendar-table th{
+padding:12px;
+background:#f6f8fc;
+font-weight:600;
+color:#444;
+border-bottom:1px solid #eee;
+}
+
+.calendar-table td{
+height:42px;
+text-align:center;
+border-bottom:1px solid #f1f1f1;
+color:#555;
+}
+
+.calendar-table tr:hover td{
+background:#fafbff;
+}
+
+/* booked */
+
+.calendar-table td.booked{
+background:#e9f0ff;
+color:#2a6df5;
+font-weight:600;
+border-radius:6px;
+}
+
+
+/* summary */
+
+.summary{
+flex:1;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 15px rgba(0,0,0,0.04);
+}
+
+.summary h3{
+margin-bottom:18px;
+}
+
+
+/* stat box */
+
+.stat{
+background:#f7f9fc;
+padding:16px;
+border-radius:10px;
+margin-bottom:15px;
+text-align:center;
+}
+
+.stat h2{
+margin:6px 0 0 0;
+color:#2a6df5;
+font-size:22px;
+}
+
+
+/* booking list */
+
+.booking-item{
+background:#f7f9fc;
+padding:12px;
+border-radius:10px;
+margin-bottom:12px;
+}
+
+.booking-item .time{
+font-weight:600;
+color:#2a6df5;
+margin-bottom:2px;
+}
+
+.booking-item .date{
+font-size:13px;
+color:#777;
+}
+
+/* ปุ่มเลือกวัน */
+
+.calendar-header .date-btn{
+background:#2a6df5;
+color:white;
+border:none;
+padding:7px 14px;
+border-radius:6px;
+font-size:13px;
+cursor:pointer;
+margin-left:10px;
+transition:0.2s;
+}
+
+/* hover ให้เข้มขึ้น */
+
+.calendar-header .date-btn:hover{
+background:#1e57d6;
+color:white;
+}
+
+.date-popup{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.4);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.date-box{
+background:#2b2f34;
+color:white;
+padding:20px;
+border-radius:10px;
+width:320px;
+}
+
+.date-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.date-grid{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:10px;
+}
+
+.date-item{
+padding:10px;
+text-align:center;
+border-radius:6px;
+cursor:pointer;
+transition:0.2s;
+}
+
+.date-item:hover{
+background:#3f454b;
+}
+
+.booking-item b{
+color:#444;
+font-weight:600;
+}
+
+.booking-item{
+line-height:1.6;
+}
+

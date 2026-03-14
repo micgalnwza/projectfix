@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>จองคิว | FM Barber</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    <h2>FM<br>Barber</h2>
+  </div>
+
+  <nav>
+    <a href="index.html">หน้าหลัก</a>
+    <a href="portfolio.html">ผลงาน</a>
+  </nav>
+
+  <div class="right-menu">
+        <a href="notification.html" class="notification active">
+            <i class="fa-solid fa-bell"></i>
+        </a>
+    <button class="login-btn" onclick="window.location.href='admin.html'">
+      เข้าสู่ระบบหลังร้าน
+    </button>
+  </div>
+</header>
+
+<hr><hr>
+
+<section class="booking-page">
+
+  <div class="booking-header">
+    <div>
+      <h1>จองคิวตัดผม FM Barber</h1>
+      <p>บริการตัดผมชายโดยช่างมือคุณภาพ เลือกวันและเวลาที่สะดวก</p>
+    </div>
+
+    <div class="notice-box">
+      ร้านเปิด 09.00 – 21.00 น.<br>
+      กรุณามาก่อนเวลา 5–10 นาที
+    </div>
+  </div>
+
+  <div class="booking-content">
+
+    <div class="left-side">
+      <h3>1. เลือกวัน</h3>
+      <div class="calendar-box">
+        <div class="calendar-header">
+          <button id="prevMonth">‹</button>
+          <h4 id="monthYear"></h4>
+          <button id="nextMonth">›</button>
+        </div>
+        <div class="calendar-grid" id="calendar"></div>
+      </div>
+
+      <div class="note-section" style="margin-top:20px;">
+        <h3>3. หมายเหตุถึงร้าน</h3>
+        <textarea id="noteInput" placeholder="ระบุรายละเอียดคำขอ (ถ้ามี)"></textarea>
+      </div>
+    </div>
+      
+    <div class="right-side">
+      <h3>2. เลือกเวลา</h3>
+      <div class="time-grid">
+        <button class="time-btn">09:00</button>
+        <button class="time-btn">09:30</button>
+        <button class="time-btn">10:00</button>
+        <button class="time-btn">10:30</button>
+        <button class="time-btn">11:00</button>
+        <button class="time-btn">11:30</button>
+        <button class="time-btn">12:00</button>
+        <button class="time-btn">12:30</button>
+        <button class="time-btn">13:00</button>
+        <button class="time-btn">13:30</button>
+        <button class="time-btn">14:00</button>
+        <button class="time-btn">14:30</button>
+        <button class="time-btn">15:00</button>
+        <button class="time-btn">15:30</button>
+        <button class="time-btn">16:00</button>
+        <button class="time-btn">16:30</button>
+        <button class="time-btn">17:00</button>
+        <button class="time-btn">17:30</button>
+        <button class="time-btn">18:00</button>
+        <button class="time-btn">18:30</button>
+        <button class="time-btn">19:00</button>
+        <button class="time-btn">19:30</button>
+        <button class="time-btn">20:00</button>
+        <button class="time-btn">20:30</button>
+        <button class="time-btn">21:00</button>
+      </div>
+
+      <div style="background: white; padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid #eee;">
+        <h3>✂️ 4. เลือกทรงผม</h3>
+        <select id="hairStyleSelect" onchange="updateStyle()" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 10px; font-family:'Kanit';">
+            <option value="UnderCut" data-deposit="50">UnderCut (มัดจำ 50.-)</option>
+            <option value="Two Block" data-deposit="50">Two Block (มัดจำ 50.-)</option>
+            <option value="Skin Fade" data-deposit="60">Skin Fade (มัดจำ 60.-)</option>
+            <option value="ทรงมาตรฐาน" data-deposit="30">ทรงมาตรฐาน (มัดจำ 30.-)</option>
+        </select>
+        <p style="color: #e74c3c; font-weight: bold; margin: 5px 0;">ยอดเงินมัดจำ: <span id="depositText">50</span> บาท</p>
+        <small style="color: #777;">*กรุณาชำระมัดจำเพื่อป้องกันการเบี้ยวคิว</small>
+      </div>
+
+      <button class="confirm-btn" onclick="goConfirm()" style="margin-top:20px;">ยืนยันการจอง</button>
+    </div>
+
+  </div>
+</section>
+
+<script>
+// --- ตัวแปรหลัก ---
+let currentDate = new Date();
+let selectedDay = null;
+let selectedTime = null;
+let selectedStyle = "UnderCut"; // ค่าเริ่มต้นตาม Option แรก
+let depositPrice = 50;
+
+const calendar = document.getElementById("calendar");
+const monthYear = document.getElementById("monthYear");
+
+// --- ฟังก์ชันอัปเดตทรงผม ---
+function updateStyle() {
+    const select = document.getElementById("hairStyleSelect");
+    selectedStyle = select.value;
+    depositPrice = select.options[select.selectedIndex].getAttribute("data-deposit");
+    document.getElementById("depositText").innerText = depositPrice;
+}
+
+// --- ฟังก์ชันปฏิทิน ---
+function renderCalendar(){
+  calendar.innerHTML = "";
+  const today = new Date();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month+1, 0).getDate();
+
+  const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+                      "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
+  monthYear.innerText = monthNames[month] + " " + (year + 543);
+
+  for(let i=0;i<firstDay;i++){
+    calendar.innerHTML += "<div></div>";
+  }
+
+  for(let day=1; day<=lastDate; day++){
+    const dayDiv = document.createElement("div");
+    dayDiv.innerText = day;
+    const thisDate = new Date(year, month, day);
+
+    if(thisDate < new Date(today.getFullYear(), today.getMonth(), today.getDate())){
+      dayDiv.classList.add("disabled");
+    } else {
+      dayDiv.onclick = function(){
+        document.querySelectorAll("#calendar div").forEach(d=>d.classList.remove("active"));
+        dayDiv.classList.add("active");
+        selectedDay = day + "/" + (month+1) + "/" + (year+543);
+        updateTimeButtons();
+      };
+    }
+
+    if(day === today.getDate() && month === today.getMonth() && year === today.getFullYear()){
+      dayDiv.classList.add("today");
+    }
+    if(new Date(year, month, day).getDay() === 0){
+      dayDiv.classList.add("sunday");
+    }
+    calendar.appendChild(dayDiv);
+  }
+}
+
+// --- เปลี่ยนเดือน ---
+document.getElementById("prevMonth").onclick = function(){
+  currentDate.setMonth(currentDate.getMonth()-1);
+  renderCalendar();
+}
+document.getElementById("nextMonth").onclick = function(){
+  currentDate.setMonth(currentDate.getMonth()+1);
+  renderCalendar();
+}
+
+// --- อัปเดตปุ่มเวลา ---
+function updateTimeButtons(){
+  if(!selectedDay) return;
+
+  const parts = selectedDay.split("/");
+  const day = parts[0];
+  const month = parts[1];
+  const year = parts[2]-543;
+
+  const dateObj = new Date(year,month-1,day);
+  const dateKey = dateObj.getFullYear() + "-" +
+    String(dateObj.getMonth()+1).padStart(2,"0") + "-" +
+    String(dateObj.getDate()).padStart(2,"0");
+
+  const schedule = JSON.parse(localStorage.getItem("schedule_"+dateKey)) || {};
+  const closed = localStorage.getItem("close_"+dateKey) === "true";
+  const buttons = document.querySelectorAll(".time-btn");
+
+  selectedTime = null;
+
+  buttons.forEach(btn=>{
+    const time = btn.innerText;
+    btn.classList.remove("active","disabled");
+    btn.style.pointerEvents="auto";
+    btn.style.opacity="1";
+
+    if(closed){
+      btn.classList.add("disabled");
+      btn.style.pointerEvents="none";
+      btn.style.opacity="0.3";
+      return;
+    }
+
+    if(schedule[time] === "ไม่ว่าง"){
+      btn.classList.add("disabled");
+      btn.style.pointerEvents="none";
+      btn.style.opacity="0.4";
+      return;
+    }
+
+    btn.onclick = function(){
+      buttons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      selectedTime = time;
+    }
+  });
+}
+
+// --- ฟังก์ชันยืนยันการจอง ---
+function goConfirm(){
+  if(!selectedDay || !selectedTime){
+    alert("กรุณาเลือกวันและเวลา");
+    return;
+  }
+
+  // เก็บข้อมูลทรงผมล่าสุดก่อนไป
+  selectedStyle = document.getElementById("hairStyleSelect").value;
+  depositPrice = document.getElementById("depositText").innerText;
+
+  const note = document.getElementById("noteInput").value;
+
+  localStorage.setItem("selectedDate", selectedDay);
+  localStorage.setItem("selectedTime", selectedTime);
+  localStorage.setItem("selectedStyle", selectedStyle);
+  localStorage.setItem("depositAmount", depositPrice);
+  localStorage.setItem("bookingNote", note);
+
+  window.location.href = "confirm.html";
+}
+
+// --- เริ่มต้น ---
+renderCalendar();
+updateTimeButtons();
+</script>
+
+</body>
+</html>

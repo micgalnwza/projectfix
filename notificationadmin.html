@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แจ้งเตือน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="layout">
+
+<!-- sidebar -->
+
+<div class="sidebar">
+
+<h2>FM Barber</h2>
+
+<a href="admin.html">การจอง</a>
+<a href="manage.html">จัดการตารางงาน</a>
+<a href="bookingadmin.html">รายการจอง</a>
+
+</div>
+
+<div class="main">
+
+<div class="header">
+    
+<div class="topbar">
+
+<button onclick="toggleNotify()" class="bell">
+🔔
+</button>
+
+<button onclick="location.href='index.html'" class="home">
+กลับสู่หน้าหลัก
+</button>
+
+</div>
+
+</div>
+
+<div id="notifyBox" class="notifyBox">
+<h4>การแจ้งเตือน</h4>
+<ul id="notifyList"></ul>
+</div>
+<div id="notifyPage" class="notifyPage">
+
+<h2>การแจ้งเตือน</h2>
+
+<div id="notifyContainer"></div>
+
+</div>
+
+</div>
+
+</body>
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Kanit',sans-serif;
+}
+
+body{
+background:#f4f6fb;
+}
+
+.layout{
+display:flex;
+}
+
+/* sidebar */
+
+.sidebar{
+width:220px;
+background:#fff;
+height:100vh;
+padding:20px;
+border-right:1px solid #eee;
+}
+
+.sidebar h2{
+margin-bottom:30px;
+}
+
+.sidebar a{
+display:block;
+padding:12px;
+margin-bottom:8px;
+text-decoration:none;
+color:#333;
+border-radius:8px;
+}
+
+.sidebar a.active{
+background:#e7efff;
+color:#2c5cff;
+}
+.topbar{
+display:flex;
+justify-content:flex-end;
+gap:10px;
+padding:10px;
+}
+
+.bell{
+font-size:20px;
+background:none;
+border:none;
+cursor:pointer;
+}
+
+.home{
+background:#3b5bdb;
+color:white;
+border:none;
+padding:8px 15px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.notifyBox{
+display:none;
+position:absolute;
+right:20px;
+top:60px;
+background:white;
+width:250px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+padding:10px;
+}
+
+.notifyBox ul{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+.notifyBox li{
+padding:8px;
+border-bottom:1px solid #eee;
+font-size:14px;
+}
+
+.main{
+flex:1;
+}
+
+.header{
+display:flex;
+justify-content:flex-end;
+padding:15px 20px;
+background:#f4f6fb;
+}
+
+.topbar{
+display:flex;
+align-items:center;
+gap:12px;
+}
+/* หน้าแจ้งเตือนแบบการ์ด */
+
+.notifyPage{
+display:none;
+padding:40px;
+}
+
+.notifyPage h2{
+margin-bottom:25px;
+font-size:24px;
+}
+
+.notify-card{
+background:#d9d9d9;
+padding:20px;
+border-radius:18px;
+width:500px;
+margin-bottom:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.notify-text{
+font-size:18px;
+font-weight:500;
+}
+
+.notify-time{
+font-size:14px;
+margin-top:5px;
+color:#333;
+}
+
+.notify-icons{
+font-size:18px;
+cursor:pointer;
+}
+</style>
+<script>
+function toggleNotify(){
+
+const page = document.getElementById("notifyPage");
+
+if(page.style.display === "block"){
+page.style.display = "none";
+}else{
+page.style.display = "block";
+renderAdminNotifyPage();
+}
+
+}
+function renderAdminNotifications(){
+
+let list = document.getElementById("notifyList");
+
+let notifications =
+JSON.parse(localStorage.getItem("adminNotifications")) || [];
+
+list.innerHTML = "";
+
+if(notifications.length === 0){
+
+list.innerHTML = "<li>ไม่มีการแจ้งเตือน</li>";
+return;
+
+}
+
+notifications.forEach((n)=>{
+
+let li = document.createElement("li");
+
+li.innerHTML =
+n.message + "<br><small>" + n.timestamp + "</small>";
+
+list.appendChild(li);
+
+});
+
+}
+
+renderAdminNotifications();
+
+function cancelBooking(name,time){
+
+/* แจ้งเตือนลูกค้า */
+
+let notifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+notifications.unshift({
+type:"cancel",
+message:"คิวของคุณถูกยกเลิกโดยร้าน",
+timestamp:new Date().toLocaleString("th-TH")
+});
+
+localStorage.setItem("notifications",JSON.stringify(notifications));
+
+
+/* แจ้งเตือนแอดมิน */
+
+let adminNotifications = JSON.parse(localStorage.getItem("adminNotifications")) || [];
+
+adminNotifications.unshift({
+message:"แอดมินยกเลิกคิว "+name+" เวลา "+time,
+timestamp:new Date().toLocaleString("th-TH")
+});
+
+localStorage.setItem("adminNotifications",JSON.stringify(adminNotifications));
+
+alert("ยกเลิกคิวแล้ว");
+
+}
+
+function renderAdminNotifyPage(){
+
+let container = document.getElementById("notifyContainer");
+
+let notifications =
+JSON.parse(localStorage.getItem("adminNotifications")) || [];
+
+container.innerHTML = "";
+
+if(notifications.length === 0){
+
+container.innerHTML = "<p>ไม่มีการแจ้งเตือน</p>";
+return;
+
+}
+
+notifications.forEach((n,i)=>{
+
+let div = document.createElement("div");
+
+div.className = "notify-card";
+
+div.innerHTML = `
+
+<div>
+<div class="notify-text">
+${n.message} ✔️
+</div>
+
+<div class="notify-time">
+${n.timestamp}
+</div>
+</div>
+
+<div class="notify-icons" onclick="deleteAdminNotify(${i})">
+🗑
+</div>
+
+`;
+
+container.appendChild(div);
+
+});
+
+}
+
+function deleteAdminNotify(i){
+
+let notifications =
+JSON.parse(localStorage.getItem("adminNotifications")) || [];
+
+notifications.splice(i,1);
+
+localStorage.setItem(
+"adminNotifications",
+JSON.stringify(notifications)
+);
+
+renderAdminNotifyPage();
+
+}
+
+</script>
+ 
+</body>
+</html>

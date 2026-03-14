@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>FM Barber</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <h2>FM<br>Barber</h2>
+    </div>
+
+    <nav>
+        <a href="index.html">หน้าหลัก</a>
+        <a href="portfolio.html">ผลงาน</a>
+    </nav>
+
+    <div class="right-menu">
+        <a href="notification.html" class="notification active">
+            <i class="fa-solid fa-bell"></i>
+        </a>
+        <button class="login-btn" onclick="window.location.href='login.html'">
+            เข้าสู่ระบบ
+        </button>
+    </div>
+</header>
+
+<hr>
+
+<section class="hero">
+    <h1>ยินดีต้อนรับ</h1>
+    <p>ดูแลทรงผมและภาพลักษณ์ของคุณอย่างมืออาชีพ</p>
+</section>
+
+<section class="styles-gallery" style="padding: 40px 20px; max-width: 1200px; margin: auto;">
+    <h3 style="text-align: center; margin-bottom: 25px;">✂️ ทรงผมยอดนิยม</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;">
+            <img src="clean.jpg" alt="UnderCut" style="width: 100%; height: 300px; object-fit: cover;">
+            <div style="padding: 15px;"><strong>UnderCut</strong><p style="color: #666; font-size: 0.9em;">คลาสสิก เท่ ดูดี</p></div>
+        </div>
+
+        <div style="background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center;">
+            <img src="ten.jpg" alt="Skin Fade" style="width: 100%; height: 300px; object-fit: cover;">
+            <div style="padding: 15px;"><strong>Skin Fade</strong><p style="color: #666; font-size: 0.9em;">เนี้ยบ สะอาดตา</p></div>
+        </div>
+
+    </div>
+</section>
+
+
+<section class="services" style="padding: 20px; max-width: 1200px; margin: auto;">
+    <h3>📁 บริการของเรา</h3>
+    <div class="card" style="width: 100%; max-width: none;">
+        <h4>ตัดผม</h4>
+        <p>ตัดผมชายตามความต้องการ เด็ก 80 ธรรมดา 100 เพิ่มเฟด 120</p>
+    </div>
+</section>
+
+<section class="booking" style="padding: 20px; max-width: 1200px; margin: auto;">
+    <h3>การจอง</h3>
+    <div id="bookingContainer"></div>
+</section>
+
+<section class="policy" style="padding: 20px; max-width: 350px; margin: auto;">
+    <div class="card policy-card" style="width: 100%; max-width: none;">
+        <h4>• นโยบายการจอง😨😨😨</h4>
+        <p class="policy-text">
+            กรุณาแจ้งเลื่อนหรือยกเลิกนัดหมายล่วงหน้าอย่างน้อย 24 ชั่วโมง 
+            เพื่อหลีกเลี่ยงค่าธรรมเนียมการยกเลิกล่าช้า 😎😋😎😍
+        </p>
+    </div>
+</section>
+
+<script>
+const container = document.getElementById("bookingContainer");
+
+function renderBooking(){
+    const booking = JSON.parse(localStorage.getItem("finalBooking"));
+
+    if(booking){
+        // แสดงผลเป็นสี่เหลี่ยมผืนผ้ายาวๆ (Horizontal) ตามความต้องการ
+        container.innerHTML = `
+        <div class="card booking-horizontal">
+            <div class="status-label">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>สถานะคิว</span>
+            </div>
+            
+            <div class="booking-content">
+                <div class="info-group">
+                    <small>ผู้จอง</small>
+                    <strong>${booking.name || "คุณ"}</strong>
+                </div>
+                <div class="info-group">
+                    <small>คิวที่</small>
+                    <strong class="q-text">#${booking.queue}</strong>
+                </div>
+                <div class="info-group">
+                    <small>วัน/เวลา</small>
+                    <strong>${booking.date} | ${booking.time}</strong>
+                </div>
+                <div class="info-group">
+                    <small>ทรงผม</small>
+                    <strong>${booking.style || "ไม่ได้ระบุ"}</strong>
+                </div>
+                <div class="info-group">
+                    <small>มัดจำ</small>
+                    <strong class="price-text">${booking.deposit || "0"} บาท</strong>
+                </div>
+            </div>
+
+            <button class="cancel-mini-btn" onclick="cancelBooking()">
+                ยกเลิกคิว
+            </button>
+        </div>
+        `;
+    } else {
+        container.innerHTML = `
+        <div class="card booking-card" style="width: 100%; text-align: center; padding: 40px;">
+            <i class="fa-solid fa-calendar-xmark" style="font-size: 3rem; color: #cbd5e1; margin-bottom: 15px;"></i>
+            <p>คุณไม่มีคิวในตอนนี้...</p>
+            <a href="booking.html" class="book-btn" style="display: inline-block; margin-top: 15px;">จองคิวตัดผมตอนนี้</a>
+        </div>
+        `;
+    }
+}
+
+function cancelBooking(){
+    const booking = JSON.parse(localStorage.getItem("finalBooking"));
+    if(!booking) return;
+
+    if(!confirm("ยืนยันการยกเลิกคิวใช่ไหม?")) return;
+
+    // บันทึกแจ้งเตือนลูกค้า
+    let notifications = JSON.parse(localStorage.getItem("notifications")) || []
+    notifications.unshift({
+        message: "คุณได้ยกเลิกคิววันที่ " + booking.date + " เวลา " + booking.time,
+        timestamp: new Date().toLocaleString("th-TH")
+    })
+    localStorage.setItem("notifications", JSON.stringify(notifications))
+
+    // บันทึกแจ้งเตือนแอดมิน
+    let adminNotifications = JSON.parse(localStorage.getItem("adminNotifications")) || []
+    adminNotifications.unshift({
+        message: "ลูกค้า " + booking.name + " ยกเลิกคิว #" + booking.queue,
+        timestamp: new Date().toLocaleString("th-TH")
+    })
+    localStorage.setItem("adminNotifications", JSON.stringify(adminNotifications))
+
+    // ลบข้อมูลคิวออกจากระบบ
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || []
+    bookings = bookings.filter(b => b.queue !== booking.queue)
+    localStorage.setItem("bookings", JSON.stringify(bookings))
+
+    localStorage.removeItem("finalBooking")
+    renderBooking()
+}
+
+// เรียกใช้งานครั้งแรกและตั้งค่าอัปเดตทุก 2 วินาที
+renderBooking();
+setInterval(renderBooking, 2000);
+</script>
+
+</body>
+</html>

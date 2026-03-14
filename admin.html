@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>FM Barber Admin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+    <h2>FM Barber</h2>
+    <div class="menu">
+        <a href="admin.html" class="active">การจอง</a>
+        <a href="manage.html">จัดการตารางงาน</a>
+        <a href="bookingadmin.html">รายการจอง</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="topbar">
+        <h3>จัดการคิวและปฏิทิน</h3>
+        <div class="right-menu">
+            <a href="notificationadmin.html">
+                <span class="bell">🔔</span>
+            </a>
+            <button class="home-btn" onclick="window.location.href='index.html'">
+                กลับสู่หน้าหลัก
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="calendar-box">
+            <div class="calendar-header">
+                <button id="prevMonth"><</button>
+                <h4 id="monthYear"></h4>
+                <button id="nextMonth">></button>
+                <button class="date-btn" onclick="toggleCalendar()">เลือกวัน</button>
+            </div>
+
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th>เวลา</th>
+                        <th>การจอง</th>
+                    </tr>
+                </thead>
+                <tbody id="calendarBody"></tbody>
+            </table>
+        </div>
+
+        <div class="summary">
+            <h3>สรุปวันนี้</h3>
+            <div class="stat">
+                <p>รอคิว (วันนี้)</p>
+                <h2 id="queueCount">0</h2>
+            </div>
+            <div class="stat">
+                <p>จองทั้งหมด (วันนี้)</p>
+                <h2 id="todayCount">0</h2>
+            </div>
+            <hr>
+            <div id="bookingList"></div>
+        </div>
+    </div>
+</div>
+
+<div id="datePopup" class="date-popup">
+    <div class="date-box">
+        <div class="date-header">
+            <span>เลือกวันที่</span>
+            <button onclick="toggleCalendar()">✕</button>
+        </div>
+        <div class="date-grid" id="dateGrid"></div>
+    </div>
+</div>
+
+<script>
+    // 1. ตรวจสอบสิทธิ์ Admin (Role Separation)
+    const auth = JSON.parse(localStorage.getItem("currentUser"));
+    if (!auth || auth.role !== 'admin') {
+        alert("สิทธิ์ไม่ถูกต้อง! หน้านี้สำหรับช่างเท่านั้น");
+        window.location.href = 'login.html';
+    }
+
+    // 2. ข้อมูลเวลา
+    const times = [
+        "09:00","09:30","10:00","10:30","11:00","11:30",
+        "12:00","12:30","13:00","13:30","14:00","14:30",
+        "15:00","15:30","16:00","16:30","17:00","17:30",
+        "18:00","18:30","19:00","19:30","20:00","20:30","21:00"
+    ];
+
+    let currentDate = new Date();
+    const monthYear = document.getElementById("monthYear");
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+    function formatDate(date) {
+        return date.toLocaleDateString("th-TH");
+    }
+
+    // 3. แสดงตารางเวลา
+    function renderCalendar() {
+        const dateString = formatDate(currentDate);
+        monthYear.innerText = currentDate.toLocaleString('th-TH', { month: 'long', year: 'numeric' }) + " วันที่ " + currentDate.getDate();
+
+        let bodyHTML = "";
+        times.forEach(time => {
+            bodyHTML += "<tr>";
+            bodyHTML += `<td class="time">${time}</td>`;
+
+            let booked = bookings.find(b => b.time === time && b.date === dateString);
+
+            if (booked) {
+                bodyHTML += `<td class="booked" style="background: #e9f0ff; color: #2a6df5; font-weight:600;">
+                                ${booked.name} (${booked.style || 'ทั่วไป'})
+                             </td>`;
+            } else {
+                bodyHTML += `<td>-</td>`;
+            }
+            bodyHTML += "</tr>";
+        });
+
+        document.getElementById("calendarBody").innerHTML = bodyHTML;
+        renderSummary();
+    }
+
+    // 4. สรุปข้อมูล (เพิ่ม ทรงผม และ มัดจำ ตามที่อาจารย์สั่ง)
+    function renderSummary() {
+        const dateString = formatDate(currentDate);
+        let todayBookings = bookings.filter(b => b.date === dateString);
+
+        document.getElementById("queueCount").innerText = todayBookings.length;
+        document.getElementById("todayCount").innerText = todayBookings.length;
+
+        let listHTML = "";
+        todayBookings.forEach(b => {
+            listHTML += `
+                <div class="booking-item" style="border-left: 5px solid #2a6df5; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 8px;">
+                    <p class="time" style="color:#2a6df5; font-weight:bold;">⏰ ${b.time}</p>
+                    <p><b>ชื่อ:</b> ${b.name || "-"}</p>
+                    <p><b>✂️ ทรงผม:</b> <span style="color:#e67e22;">${b.style || "ไม่ได้ระบุ"}</span></p>
+                    <p><b>💰 มัดจำ:</b> <span style="color:green;">${b.deposit || "0"} บาท (ยืนยันแล้ว)</span></p>
+                    <p style="font-size: 12px; color: #777;">คิวที่: #${b.queue}</p>
+                </div>
+            `;
+        });
+
+        document.getElementById("bookingList").innerHTML = listHTML || "<p>ไม่มีการจองในวันนี้</p>";
+    }
+
+    // 5. ระบบปฏิทิน Popup
+    function toggleCalendar() {
+        const popup = document.getElementById("datePopup");
+        popup.style.display = popup.style.display === "flex" ? "none" : "flex";
+    }
+
+    function renderDatePopup() {
+        const grid = document.getElementById("dateGrid");
+        grid.innerHTML = "";
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            let d = document.createElement("div");
+            d.className = "date-item";
+            d.innerText = i;
+            if (i === currentDate.getDate()) d.style.background = "#2a6df5"; d.style.color = "white";
+            d.onclick = function() {
+                currentDate.setDate(i);
+                renderCalendar();
+                toggleCalendar();
+            }
+            grid.appendChild(d);
+        }
+    }
+
+    // 6. ปุ่มเปลี่ยนเดือน
+    document.getElementById("prevMonth").onclick = () => {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        renderCalendar();
+        renderDatePopup();
+    }
+
+    document.getElementById("nextMonth").onclick = () => {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        renderCalendar();
+        renderDatePopup();
+    }
+
+    // เริ่มทำงานครั้งแรก
+    renderCalendar();
+    renderDatePopup();
+
+</script>
+
+</body>
+</html>
